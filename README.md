@@ -371,28 +371,6 @@ Built with:
 - Google Custom Search API for web search
 - Firecrawl API for web scraping
 
-## 📝 License
 
-MIT
 
-## 🤝 Contributing
-
-This is a proof-of-concept. Feel free to fork, extend, and improve! Contributions welcome via pull requests.
-
-## 🔮 Future Enhancements
-
-- **Website Crawling**: Recursively scrape entire websites
-- **PDF Processing**: Extract entities from PDF documents
-- **Image Analysis**: Use vision models to analyze screenshots and diagrams
-- **Export Features**: JSON, CSV, Gephi formats
-- **Timeline View**: Visualize events chronologically
-- **Advanced Filters**: Filter graph by entity type, confidence, date range
-
-## 📞 Support
-
-For issues, questions, or feature requests, please open a GitHub issue.
-
----
-
-**Happy Investigating! 🔍**
- 
+#
