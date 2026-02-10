@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investigation Assistant</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1>🔍 Investigation Assistant</h1>
+      </div>
+      <div class="header-right">
+        <button id="btn-settings" class="btn-icon" title="Settings">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Settings Panel -->
+    <section id="view-settings" class="view hidden">
+      <div class="view-header">
+        <h2>Settings</h2>
+        <button class="btn-back" data-view="dashboard">← Back</button>
+      </div>
+      <form id="settings-form" class="form">
+        <div class="form-group">
+          <label>LLM Provider</label>
+          <select id="setting-provider">
+            <option value="openai">OpenAI</option>
+            <option value="custom">Custom (Ollama, etc.)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>API Endpoint</label>
+          <input type="text" id="setting-endpoint" placeholder="https://api.openai.com">
+        </div>
+        <div class="form-group">
+          <label>API Key</label>
+          <input type="password" id="setting-apikey" placeholder="sk-...">
+        </div>
+        <div class="form-group">
+          <label>Model</label>
+          <input type="text" id="setting-model" placeholder="gpt-4o">
+        </div>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+        <h3 style="margin-bottom: 12px; font-size: 14px; color: var(--text);">Web Research APIs (Optional)</h3>
+
+        <div class="form-group">
+          <label>Google Search API Key</label>
+          <input type="password" id="setting-google-api-key" placeholder="AIza...">
+          <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">
+            For autonomous web research. Get it from <a href="https://developers.google.com/custom-search/v1/overview" target="_blank">Google Custom Search API</a>
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Google Custom Search Engine ID</label>
+          <input type="text" id="setting-google-cx" placeholder="abc123...">
+          <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">
+            Create a Custom Search Engine at <a href="https://programmablesearchengine.google.com/" target="_blank">Google CSE</a>
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Firecrawl API Key</label>
+          <input type="password" id="setting-firecrawl-api-key" placeholder="fc-...">
+          <small style="display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px;">
+            For web scraping. Get it from <a href="https://firecrawl.dev" target="_blank">Firecrawl</a>
+          </small>
+        </div>
+
+        <button type="submit" class="btn-primary">Save Settings</button>
+      </form>
+    </section>
+
+    <!-- Dashboard (Investigation List) -->
+    <section id="view-dashboard" class="view">
+      <div class="investigation-list" id="investigation-list">
+        <!-- Populated dynamically -->
+      </div>
+      <button id="btn-new-investigation" class="btn-primary btn-full">
+        + New Investigation
+      </button>
+    </section>
+
+    <!-- New Investigation Form -->
+    <section id="view-new-investigation" class="view hidden">
+      <div class="view-header">
+        <h2>New Investigation</h2>
+        <button class="btn-back" data-view="dashboard">← Back</button>
+      </div>
+      <form id="investigation-form" class="form">
+        <div class="form-group">
+          <label>Investigation Title</label>
+          <input type="text" id="inv-title" placeholder="e.g., Shell Company Network Analysis" required>
+        </div>
+        <div class="form-group">
+          <label>Objective</label>
+          <textarea id="inv-objective" rows="3" placeholder="What are you trying to uncover?" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Hypotheses</label>
+          <div id="hypotheses-list" class="tag-input-list"></div>
+          <div class="input-with-button">
+            <input type="text" id="inv-hypothesis-input" placeholder="Add a hypothesis...">
+            <button type="button" id="btn-add-hypothesis" class="btn-small">+</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Signals of Interest</label>
+          <div id="signals-list" class="tag-input-list"></div>
+          <div class="input-with-button">
+            <input type="text" id="inv-signal-input" placeholder="Add a signal to watch for...">
+            <button type="button" id="btn-add-signal" class="btn-small">+</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary btn-full">Start Investigation</button>
+      </form>
+    </section>
+
+    <!-- Active Investigation View -->
+    <section id="view-investigation" class="view hidden">
+      <div class="view-header">
+        <h2 id="active-inv-title">Investigation</h2>
+        <button class="btn-back" data-view="dashboard">← Back</button>
+      </div>
+
+      <!-- Investigation Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="capture">📸 Capture</button>
+        <button class="tab" data-tab="entities">🕸️ Entities</button>
+        <button class="tab" data-tab="suggestions">💡 Leads</button>
+        <button class="tab" data-tab="captures">📋 History</button>
+      </div>
+
+      <!-- Capture Tab -->
+      <div id="tab-capture" class="tab-content active">
+        <div class="capture-actions">
+          <button id="btn-capture-full" class="btn-capture btn-full">
+            📸 Capture Page
+          </button>
+        </div>
+        <div id="capture-preview" class="capture-preview hidden">
+          <img id="capture-image" src="" alt="Captured screenshot">
+          <div class="capture-meta" id="capture-meta"></div>
+        </div>
+        <div id="extraction-status" class="status hidden"></div>
+        <div id="extraction-results" class="extraction-results hidden">
+          <h3>Extracted Information</h3>
+          <div id="extracted-entities" class="entity-list"></div>
+          <div id="extracted-relationships" class="relationship-list"></div>
+          <div id="extracted-suggestions" class="suggestion-list"></div>
+          <div class="extraction-actions">
+            <button id="btn-save-extraction" class="btn-primary">Save to Investigation</button>
+            <button id="btn-discard-extraction" class="btn-secondary">Discard</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entities Tab -->
+      <div id="tab-entities" class="tab-content hidden">
+        <div id="entity-graph-summary" class="graph-summary"></div>
+        <button id="btn-open-graph" class="btn-primary btn-full" style="margin-bottom: 12px;">
+          🕸️ View Graph Visualization
+        </button>
+        <div id="all-entities" class="entity-list"></div>
+        <div id="all-relationships" class="relationship-list"></div>
+      </div>
+
+      <!-- Suggestions Tab -->
+      <div id="tab-suggestions" class="tab-content hidden">
+        <div id="exploration-queue" class="suggestion-list"></div>
+      </div>
+
+      <!-- Capture History Tab -->
+      <div id="tab-captures" class="tab-content hidden">
+        <div id="capture-history" class="capture-history-list"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../shared/schema.js"></script>
+  <script src="../shared/store.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

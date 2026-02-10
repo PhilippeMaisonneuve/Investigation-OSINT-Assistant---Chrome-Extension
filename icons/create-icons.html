@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Generate Extension Icons</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 20px;
+      background: #1a1d27;
+      color: #e4e6f0;
+    }
+    canvas {
+      margin: 10px;
+      border: 1px solid #6c72cb;
+    }
+    a {
+      color: #6c72cb;
+      text-decoration: none;
+      display: block;
+      margin: 10px;
+      padding: 8px 12px;
+      background: #242836;
+      border-radius: 6px;
+      text-align: center;
+      max-width: 200px;
+    }
+    a:hover {
+      background: #2e3348;
+    }
+  </style>
+</head>
+<body>
+  <h1>Extension Icon Generator</h1>
+  <p>Right-click each canvas and "Save Image As..." or click the download links.</p>
+  
+  <script>
+  function createIcon(size) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // Background with rounded corners
+    ctx.fillStyle = '#6c72cb';
+    ctx.beginPath();
+    const radius = size * 0.2;
+    ctx.moveTo(radius, 0);
+    ctx.lineTo(size - radius, 0);
+    ctx.arcTo(size, 0, size, radius, radius);
+    ctx.lineTo(size, size - radius);
+    ctx.arcTo(size, size, size - radius, size, radius);
+    ctx.lineTo(radius, size);
+    ctx.arcTo(0, size, 0, size - radius, radius);
+    ctx.lineTo(0, radius);
+    ctx.arcTo(0, 0, radius, 0, radius);
+    ctx.closePath();
+    ctx.fill();
+
+    // Magnifying glass
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = size * 0.08;
+    ctx.lineCap = 'round';
+    
+    // Circle
+    ctx.beginPath();
+    ctx.arc(size * 0.42, size * 0.42, size * 0.22, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Handle
+    ctx.beginPath();
+    ctx.moveTo(size * 0.58, size * 0.58);
+    ctx.lineTo(size * 0.78, size * 0.78);
+    ctx.stroke();
+
+    document.body.appendChild(canvas);
+
+    const link = document.createElement('a');
+    link.download = `icon${size}.png`;
+    link.href = canvas.toDataURL();
+    link.textContent = `⬇️ Download ${size}x${size} Icon`;
+    document.body.appendChild(link);
+  }
+
+  createIcon(16);
+  createIcon(48);
+  createIcon(128);
+  </script>
+</body>
+</html>

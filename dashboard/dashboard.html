@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investigation Graph</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 id="investigation-title">🕸️ Investigation Graph</h1>
+      </div>
+      <div class="header-right">
+        <button id="btn-toggle-chat" class="btn-secondary">💬 Ask AI</button>
+        <button id="btn-add-entity" class="btn-secondary">➕ Add Entity</button>
+        <button id="btn-add-relationship" class="btn-secondary">🔗 Add Relationship</button>
+        <button id="btn-fit-graph" class="btn-secondary">🔍 Fit View</button>
+        <button id="btn-refresh" class="btn-secondary">🔄 Refresh</button>
+      </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-entities">0</span>
+        <span class="stat-label">Entities</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-relationships">0</span>
+        <span class="stat-label">Relationships</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-captures">0</span>
+        <span class="stat-label">Captures</span>
+      </div>
+    </div>
+
+    <!-- Graph Container -->
+    <div id="graph-container"></div>
+
+    <!-- AI Chat Panel -->
+    <div id="chat-panel" class="chat-panel hidden">
+      <div class="panel-header">
+        <h3>🤖 Ask AI About Graph</h3>
+        <button id="btn-close-chat" class="btn-close">×</button>
+      </div>
+      <div class="conversation-controls">
+        <select id="conversation-select" class="conversation-select">
+          <option value="">New Conversation</option>
+        </select>
+        <button id="btn-new-conversation" class="btn-icon" title="New Conversation">➕</button>
+        <button id="btn-delete-conversation" class="btn-icon" title="Delete Conversation">🗑️</button>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="chat-message system">
+          Ask me questions about your investigation graph. I can:
+          <ul>
+            <li>Answer questions based on entities and relationships</li>
+            <li>Find connections between entities</li>
+            <li>Infer new relationships from existing data</li>
+            <li>Provide reasoning and evidence</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chat-input-container">
+        <input type="text" id="chat-input" placeholder="Ask a question about the graph..." />
+        <button id="btn-send-chat" class="btn-primary">Send</button>
+      </div>
+    </div>
+
+    <!-- Entity Details Panel -->
+    <div id="entity-panel" class="entity-panel hidden">
+      <div class="panel-header">
+        <h3 id="panel-entity-name">Entity Details</h3>
+        <button id="btn-close-panel" class="btn-close">×</button>
+      </div>
+      <div class="panel-content">
+        <div id="panel-entity-type" class="entity-type-badge"></div>
+        <div id="panel-entity-details"></div>
+        <div id="panel-entity-connections"></div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <h4>Entity Types</h4>
+      <div class="legend-items">
+        <div class="legend-item"><span class="legend-color" style="background: #e05555;"></span> Person</div>
+        <div class="legend-item"><span class="legend-color" style="background: #4a9ede;"></span> Organization</div>
+        <div class="legend-item"><span class="legend-color" style="background: #4caf7c;"></span> Location</div>
+        <div class="legend-item"><span class="legend-color" style="background: #e8a838;"></span> Financial</div>
+        <div class="legend-item"><span class="legend-color" style="background: #9c6ade;"></span> Date</div>
+        <div class="legend-item"><span class="legend-color" style="background: #d4785c;"></span> Asset</div>
+        <div class="legend-item"><span class="legend-color" style="background: #57b5b5;"></span> Event</div>
+        <div class="legend-item"><span class="legend-color" style="background: #f4a261;"></span> Source</div>
+        <div class="legend-item"><span class="legend-color" style="background: #6b6f8a;"></span> Identifier</div>
+      </div>
+    </div>
+
+    <!-- Add Entity Modal -->
+    <div id="entity-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Create Entity</h3>
+          <button id="btn-close-entity-modal" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Entity Name *</label>
+            <input type="text" id="entity-name" placeholder="e.g., John Doe, ACME Corp" required>
+          </div>
+          <div class="form-group">
+            <label>Type *</label>
+            <select id="entity-type">
+              <option value="person">Person</option>
+              <option value="organization">Organization</option>
+              <option value="location">Location</option>
+              <option value="financial">Financial</option>
+              <option value="date">Date</option>
+              <option value="identifier">Identifier</option>
+              <option value="asset">Asset</option>
+              <option value="event">Event</option>
+              <option value="source">Source</option>
+            </select>
+          </div>
+          <div id="source-fields" class="source-fields hidden">
+            <div class="form-group">
+              <label>URL / Reference</label>
+              <input type="text" id="source-url" placeholder="https://example.com/article">
+            </div>
+            <div class="form-group">
+              <label>Date Collected *</label>
+              <input type="date" id="source-collected" required>
+            </div>
+            <div class="form-group">
+              <label>Publication Date (optional)</label>
+              <input type="date" id="source-published">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Aliases (comma-separated, optional)</label>
+            <input type="text" id="entity-aliases" placeholder="e.g., Johnny, J. Doe">
+          </div>
+          <div class="form-group">
+            <label>Notes (optional)</label>
+            <textarea id="entity-notes" rows="3" placeholder="Additional information about this entity"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-save-entity" class="btn-primary">Create Entity</button>
+          <button id="btn-cancel-entity" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Relationship Modal -->
+    <div id="relationship-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Create Relationship</h3>
+          <button id="btn-close-modal" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="relationship-preview">
+            <span id="rel-source-name" class="entity-badge"></span>
+            <span class="arrow">→</span>
+            <span id="rel-target-name" class="entity-badge"></span>
+          </div>
+          <div class="form-group">
+            <label>Relationship Type</label>
+            <input type="text" id="rel-type" placeholder="e.g., works_for, owns, related_to" list="rel-type-suggestions">
+            <datalist id="rel-type-suggestions">
+              <option value="works_for">
+              <option value="owns">
+              <option value="director_of">
+              <option value="shareholder_of">
+              <option value="paid">
+              <option value="located_at">
+              <option value="associated_with">
+              <option value="related_to">
+            </datalist>
+          </div>
+          <div class="form-group">
+            <label>Description (optional)</label>
+            <input type="text" id="rel-label" placeholder="Human-readable description">
+          </div>
+          <div class="form-group">
+            <label>Confidence: <span id="confidence-value">0.7</span></label>
+            <input type="range" id="rel-confidence" min="0" max="1" step="0.1" value="0.7">
+          </div>
+          <div class="form-group">
+            <label>Supporting Sources (optional)</label>
+            <div id="rel-sources-list" class="sources-list"></div>
+            <button type="button" id="btn-add-source-to-rel" class="btn-secondary btn-small">+ Add Source</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-save-relationship" class="btn-primary">Create Relationship</button>
+          <button id="btn-cancel-relationship" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/schema.js"></script>
+  <script src="../shared/store.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
