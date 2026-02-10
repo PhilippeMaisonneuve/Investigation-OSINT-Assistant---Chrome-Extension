@@ -395,5 +395,4 @@ For issues, questions, or feature requests, please open a GitHub issue.
 ---
 
 **Happy Investigating! 🔍**
-#   I n v e s t i g a t i o n - O S I N T - A s s i s t a n t - - - C h r o m e - E x t e n s i o n  
  
